@@ -21,10 +21,10 @@ public class directedCycles {
     
      void findCycle(int v)   //递归DFS
     {
-        if(visited[v]==1)
+        if(visited[v]==1)   //刚开始的时候visited[v]都是0，如果发现某个节点visited[v]是1，说明被访问过，说明成环了。
         {
             int j;
-            if((j=trace.indexOf(v))!=-1)
+            if((j=trace.indexOf(v))!=-1)      //indexOf方法返回指定元素的第一个匹配项的索引在此列表中，或者如果此列表中不包含该元素返回-1。
             {
                 hasCycle=true;
                 System.out.print("Cycle:");
@@ -46,7 +46,7 @@ public class directedCycles {
             if(e[v][i]==1)
                 findCycle(i);
         }
-        trace.remove(trace.size()-1);
+        trace.remove(trace.size()-1);  //去除首尾相连的节点中的尾节点
     }
   
   public boolean getHasCycle(){
