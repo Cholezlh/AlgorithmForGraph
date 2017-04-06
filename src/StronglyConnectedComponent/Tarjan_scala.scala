@@ -4,6 +4,8 @@ import  scala.collection.mutable.{Buffer,Set,Map}
 
 
 object Tarjan_scala{
+  
+
     def main(args: Array[String]) {
 
 //    tarjan_scc(Map(
@@ -14,11 +16,12 @@ object Tarjan_scala{
 //    
 //    //结果： ArrayBuffer(ArrayBuffer(9), ArrayBuffer(7, 6, 8), ArrayBuffer(5), ArrayBuffer(1, 2), ArrayBuffer(3, 4))
     
-    test_scc(Map(
-      1 -> List(2,3),    2 -> List(4), 3 -> List(4,5),
-      4 -> List(1,6), 5 -> List(6),    6 -> Nil
+    val a = tarjan_anyType(Map(
+      1L -> List(2L,3L),  2L -> List(4L), 3L -> List(4L,5L),
+      4L -> List(1L,6L), 5L -> List(6L),    6L -> Nil
     ))
     
+    println(a)
     println("Done")
     //ArrayBuffer(ArrayBuffer(6), ArrayBuffer(5), ArrayBuffer(3, 1, 4, 2))
     
@@ -69,44 +72,47 @@ def tarjan_scc(g: Map[Int, List[Int]])= {
   println(rt)
 }
 
-def test_scc(g: Map[Int, List[Int]])= {
-  val st = collection.mutable.Stack[Int]() 
-  val index = Map.empty[Int, Int]
-  val lowl = Map.empty[Int, Int]
-  val result = Buffer.empty[Buffer[Int]]
 
-  def visit(v: Int): Unit = {
-    index(v) = index.size
-    lowl(v) = index(v)
-    st.push(v)
+def tarjan_anyType[TP](g: Map[TP, List[TP]])= {
+  val stack = collection.mutable.Stack[TP]() 
+  val index = Map.empty[TP, Int]
+  val lowl = Map.empty[TP, Int]
+  val result = Buffer.empty[Buffer[TP]]
+  var time = 0;
+
+  def visit(v: TP): Unit = {
+    index(v) = time
+    lowl(v) = time
+    time =time+1
+    stack.push(v)
   
 
     for (w <- g(v)) {
       if (!index.contains(w)) {
         visit(w)
         lowl(v) = math.min(lowl(w), lowl(v))
-      } else if (st.contains(w)) {
+      } else if (stack.contains(w)) {
         lowl(v) = math.min(lowl(v), index(w))
       }
     }
 
     if (lowl(v) == index(v)) {
-      val scc = Buffer.empty[Int]
-      var w = -1
-
-      while(v != w) {
-        w = st.pop()
-        scc += w
-         
+      val scc = Buffer.empty[TP]
+       
+      var over = false
+      while(!over) {
+        var p = stack.pop()
+        scc += p
+        if(v == p)
+          over = true
       }
-
-      if(scc.size>1)
+ 
         result += scc
     }
   }
 
   for (v <- g.keys) 
-    if (!index.contains(v)) 
+    if (!lowl.contains(v)) 
       visit(v)
      
   result
