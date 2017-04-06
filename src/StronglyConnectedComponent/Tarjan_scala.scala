@@ -14,17 +14,17 @@ object Tarjan_scala{
 //    
 //    //结果： ArrayBuffer(ArrayBuffer(9), ArrayBuffer(7, 6, 8), ArrayBuffer(5), ArrayBuffer(1, 2), ArrayBuffer(3, 4))
     
-    tarjan_scc(Map(
+    test_scc(Map(
       1 -> List(2,3),    2 -> List(4), 3 -> List(4,5),
       4 -> List(1,6), 5 -> List(6),    6 -> Nil
     ))
     
+    println("Done")
     //ArrayBuffer(ArrayBuffer(6), ArrayBuffer(5), ArrayBuffer(3, 1, 4, 2))
     
    }
     
 
-   
 
 def tarjan_scc(g: Map[Int, List[Int]])= {
   val st = Buffer.empty[Int]
@@ -63,10 +63,53 @@ def tarjan_scc(g: Map[Int, List[Int]])= {
   }
 
   for (v <- g.keys) 
-    if (!i.contains(v)) visit(v)
-      println(rt)
+    if (!i.contains(v)) 
+      visit(v)
+   
+  println(rt)
 }
 
+def test_scc(g: Map[Int, List[Int]])= {
+  val st = collection.mutable.Stack[Int]() 
+  val index = Map.empty[Int, Int]
+  val lowl = Map.empty[Int, Int]
+  val result = Buffer.empty[Buffer[Int]]
 
+  def visit(v: Int): Unit = {
+    index(v) = index.size
+    lowl(v) = index(v)
+    st.push(v)
+  
+
+    for (w <- g(v)) {
+      if (!index.contains(w)) {
+        visit(w)
+        lowl(v) = math.min(lowl(w), lowl(v))
+      } else if (st.contains(w)) {
+        lowl(v) = math.min(lowl(v), index(w))
+      }
+    }
+
+    if (lowl(v) == index(v)) {
+      val scc = Buffer.empty[Int]
+      var w = -1
+
+      while(v != w) {
+        w = st.pop()
+        scc += w
+         
+      }
+
+      if(scc.size>1)
+        result += scc
+    }
+  }
+
+  for (v <- g.keys) 
+    if (!index.contains(v)) 
+      visit(v)
+     
+  result
+}
 
 }

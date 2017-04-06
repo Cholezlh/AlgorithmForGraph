@@ -87,7 +87,7 @@ def tarjan(graph):
         # for each (v, w) in E do (iterate on graph[v])
         for w in edges:
             # If (w[index] undefined], successor hasn't been visited yet
-            if w not in stack:
+            if w not in index:
                 # Visit and add as successor
                 strong_connect(w)
                 lowlink[v] = min(lowlink[v], lowlink[w])
