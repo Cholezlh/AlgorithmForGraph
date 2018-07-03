@@ -1,3 +1,4 @@
+# coding: utf-8 
 import numpy as np
 
 import matplotlib.pyplot as plt
@@ -18,7 +19,7 @@ def laplaEigen(dataMat,k,t):
     L=D-W  
     #Dinv=np.linalg.inv(D)  
     X=np.dot(D.I,L)  
-    lamda,f=np.linalg.eig(X)  
+    lamda,f=np.linalg.eig(X)    #lamda,f 特征值和特征向量是一一对应的
     return lamda,f 
 
  

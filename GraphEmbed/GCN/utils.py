@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 from __future__ import print_function
 
 import scipy.sparse as sp
@@ -23,14 +24,26 @@ def load_data(path="data/cora/", dataset="cora"):
     # build graph
     idx = np.array(idx_features_labels[:, 0], dtype=np.int32)
     idx_map = {j: i for i, j in enumerate(idx)}
+
+    #（节点1名称，节点2名称）
     edges_unordered = np.genfromtxt("{}{}.cites".format(path, dataset), dtype=np.int32)
-    edges = np.array(list(map(idx_map.get, edges_unordered.flatten())),
-                     dtype=np.int32).reshape(edges_unordered.shape)
-    adj = sp.coo_matrix((np.ones(edges.shape[0]), (edges[:, 0], edges[:, 1])),
+    # print("edges_unordered shape: ", edges_unordered.shape)  #(5429L, 2L)
+    # print(edges_unordered)
+
+    #（节点1 idx，节点2 idx）
+    edges = np.array(list(map(idx_map.get, edges_unordered.flatten())),dtype=np.int32).reshape(edges_unordered.shape)
+    # print("edges shape: ", edges.shape)  #(5429L, 2L)
+    # print(edges)
+    adj = sp.coo_matrix((np.ones(edges.shape[0]), (edges[:, 0], edges[:, 1])),   #coo_matrix((data,(row,col)), shape=(4,4)).todense()
                         shape=(labels.shape[0], labels.shape[0]), dtype=np.float32)
 
-    # build symmetric adjacency matrix
+    #np.savetxt('test1.csv', adj.todense(), fmt="%d", delimiter=',')
+
+    # build symmetric adjacency matrix  原来用上面的方法生成的邻接矩阵是有向图的，这边考虑的是无向图，无向图邻接矩阵是对称的，所以转换一下。
     adj = adj + adj.T.multiply(adj.T > adj) - adj.multiply(adj.T > adj)
+    #np.savetxt('test2.csv', adj.todense(), fmt="%d", delimiter=',')
+    #print(adj.todense())
+
 
     print('Dataset has {} nodes, {} edges, {} features.'.format(adj.shape[0], edges.shape[0], features.shape[1]))
 
@@ -38,18 +51,18 @@ def load_data(path="data/cora/", dataset="cora"):
 
 
 def normalize_adj(adj, symmetric=True):
-    if symmetric:
-        d = sp.diags(np.power(np.array(adj.sum(1)), -0.5).flatten(), 0)
+    if symmetric:   #D-0.5 A D-0.5   D是节点度的对角矩阵
+        d = sp.diags(np.power(np.array(adj.sum(1)), -0.5).flatten(), 0)    #矩阵 sum(axis=1) 按列相加，每行对饮给一个点，按列相加就是这个点的度
         a_norm = adj.dot(d).transpose().dot(d).tocsr()
-    else:
+    else:  #D-1 A
         d = sp.diags(np.power(np.array(adj.sum(1)), -1).flatten(), 0)
         a_norm = d.dot(adj).tocsr()
     return a_norm
 
 
 def preprocess_adj(adj, symmetric=True):
-    adj = adj + sp.eye(adj.shape[0])
-    adj = normalize_adj(adj, symmetric)
+    adj = adj + sp.eye(adj.shape[0])   # trick 1:对每一个节点都强行加上自环  A+I
+    adj = normalize_adj(adj, symmetric)  # trick 2:与非归一化的A相乘会完全改变特征向量的尺度，  因此需要归一化使A的各行和为1
     return adj
 
 
