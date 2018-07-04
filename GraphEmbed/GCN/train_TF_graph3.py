@@ -69,7 +69,9 @@ out_layer = tf.matmul(layer1, weight['out']) + bias['out']
 
 # 定义损失函数
 loss = tf.nn.softmax_cross_entropy_with_logits( logits=out_layer, labels=y_)
-loss = tf.boolean_mask(loss, train_mask)  #只保留boolean_mask对应的位置
+train_mask = tf.cast(train_mask, dtype=tf.float32)
+train_mask /= tf.reduce_mean(train_mask)
+loss *= train_mask
 cost = tf.reduce_mean(loss)
 
 # 优化
@@ -78,7 +80,10 @@ optimizer = tf.train.AdamOptimizer(0.001).minimize(cost)
 # 初始化所有变量
 init = tf.initialize_all_variables()
 correct_prediction = tf.equal(tf.argmax(out_layer, 1), tf.argmax(y, 1))
-correct_prediction = tf.boolean_mask(correct_prediction, test_mask)
+correct_prediction = tf.cast(correct_prediction, dtype=tf.float32)
+test_mask = tf.cast(test_mask, dtype=tf.float32)
+test_mask /= tf.reduce_mean(test_mask)
+correct_prediction *= test_mask
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, 'float'))
 
 with tf.Session() as sess:
